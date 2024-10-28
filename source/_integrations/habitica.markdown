@@ -2,7 +2,7 @@
 title: Habitica
 description: Instructions on enabling Habitica support for your Home Assistant
 ha_category:
-  - Hub
+  - To-do list
   - Sensor
 ha_release: 0.78
 ha_iot_class: Cloud Polling
@@ -18,6 +18,15 @@ ha_codeowners:
   - '@tr4nt0r'
 ha_config_flow: true
 ha_integration_type: integration
+related:
+  - docs: /integrations/todo
+    title: To-do list integration documentation
+  - docs: /integrations/#to-do-list
+    title: List of to-do list integrations
+  - docs: /dashboards/todo-list/
+    title: To-do list card
+  - url: https://habitica.com/
+    title: Habitica
 ---
 
 The Habitca {% term integration %} enables you to monitor your adventurer's progress and stats in Home Assistant and seamlessly integrates your to-do's and daily tasks.
@@ -45,6 +54,8 @@ The Habitca {% term integration %} enables you to monitor your adventurer's prog
 - **Next level:** Indicates the remaining experience points needed to reach the next level (for example, "440 XP").
 - **Habits:** Shows the number of habits being tracked (for example, "4 tasks").
 - **Rewards:** Displays the rewards that can be redeemed (for example, "1 task")
+- **Gems:** Shows the total number of gems currently owned by your Habitica character, used for purchasing items and customizations.
+- **Mystic hourglasses:** Displays the number of mystic hourglasses earned as a subscriber, which can be redeemed for exclusive items from past events.
 
 ## To-do lists
 
@@ -60,10 +71,137 @@ The following Habitica tasks are available as to-do lists in Home Assistant. You
 - **Buy a health potion:** Allows your character to purchase a health potion in Habitica. Instantly applies the potion upon purchase, healing 15 HP at a cost of 25 GP.
 - **Allocate all stat points**: Assigns all unallocated stat points based on the previously set automatic allocation method. If no method is set, all points are assigned to strength (STR).
 
+## Button controls for class skills
+
+If you've unlocked the class system, button controls for casting player and party skills will become available, depending on the class you've selected. For task skills see [action `habitica.cast_skill`](#action-habiticacast_skill)
+
+### Mage
+
+- **Ethereal surge**: You sacrifice Mana so the rest of your party, except for other mages, gains MP. (based on: INT)
+- **Earthquake**: Your mental power shakes the earth and buffs your party's intelligence. (based on: unbuffed INT)
+- **Chilling frost:** With one cast, ice freezes all your streaks so they won't reset to zero tomorrow.
+
+### Warrior
+
+- **Defensive stance**: You crouch low and gain a buff to constitution. (based on: unbuffed CON)
+- **Valorous presence**: Your boldness buffs your whole party's strength. (based on: unbuffed STR)
+- **Intimidating gaze:** Your fierce stare buffs your whole Party's constitution. (based on: unbuffed CON)
+
+### Rogue
+
+- **Tools of the trade**: Your tricky talents buff your whole party's perception. (based on: unbuffed PER)
+- **Stealth**: With each cast, a few of your undone dailies won't cause damage tonight. Their streaks and colors won't change. (based on: PER)
+
+### Healer
+
+- **Healing light**: Shining light restores your health. (based on: CON and INT)
+- **Searing brightness**: A burst of light makes your tasks more blue/less red. (based on: INT)
+- **Protective aura**: You shield your party by buffing their constitution. (based on: unbuffed CON)
+- **Blessing**: Your soothing spell restores your whole party's health. (based on: CON and INT)
+
 ## Switch controls
 
-- **Rest in the Inn:** When enabled, allows your character to rest in the inn in Habitica, pausing damage dealt from dailies and quest bosses.
+- **Rest in the Inn**: When enabled, allows your character to rest in the inn in Habitica, pausing damage dealt from dailies and quest bosses.
 
+## Actions
+
+### Action `habitica.cast_skill`
+
+Use a skill or spell from your Habitica character on a specific task to affect its progress or status.
+
+| Data attribute | Optional |  Description                                                                                                      |
+| -------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `config_entry` | no       |  Config entry of the character to cast the skill.                                                                 |
+| `skill`        | no       |  Skill or spell you want to cast on the task. Only skills available to your character's class can be used.        |
+| `task`         | no       |  The name of the task to target. Alternatively, you can use the `task ID` or **alias**. Supported task types are **to-do**, **habit**, and **daily**. |
+
+#### Available skills
+
+- **Rogue:** `pickpocket`, `backstab`
+- **Warrior:** `smash`
+- **Mage:** `fireball`
+
+To use task aliases, make sure **Developer Mode** is enabled under [**Settings -> Site Data**](https://habitica.com/user/settings/siteData). Task aliases can only be edited via the **Habitica** web client.
+
+## Automations
+
+Get started with these automation examples for Habitica, each featuring ready-to-use blueprints!
+
+### Create "Empty the dishwasher" to-do
+
+Automatically create a Habitica to-do when the dishwasher finishes its cycle.
+
+{% my blueprint_import badge blueprint_url="https://community.home-assistant.io/t/habitica-create-to-do-when-dishwasher-finishes-its-cycle/786625" %}
+
+{% details "Example YAML configuration" %}
+
+{% raw %}
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: sensor.dishwasher
+    from: "on"
+    to: "off"
+
+actions:
+  - action: todo.add_item
+    data:
+      item: "Empty the dishwasher 🥣🍽️"
+      due_date: "{{now().date()}}"
+      description: "Empty the clean dishes from the dishwasher and load any dirty dishes that are waiting."
+    target:
+      entity_id: todo.habitica_to_dos
+```
+
+{% endraw %}
+
+{% enddetails %}
+
+### Complete toothbrushing tasks on your Habitica Dailies list
+
+Automatically mark your morning and evening toothbrushing dailies as complete when your toothbrush usage is detected.
+
+{% my blueprint_import badge blueprint_url="https://community.home-assistant.io/t/habitica-complete-toothbrushing-tasks-on-your-habitica-dailies-list/786631" %}
+
+{% details "Example YAML configuration" %}
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: sensor.oralb_toothbrush_state
+    to: "running"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10 # Time delay for debouncing to avoid false triggers
+actions:
+  - choose:
+      - conditions:
+          - condition: time
+            after: "05:00:00"
+            before: "12:00:00"
+        sequence:
+          - action: todo.update_item
+            data:
+              item: "Brush your teeth in the morning 🪥"
+              status: completed
+            target:
+              entity_id: todo.habitica_dailies
+      - conditions: 
+          - condition: time
+            after: "18:00:00"
+            before: "23:59:00"
+        sequence:
+          - action: todo.update_item
+            data:
+              item: "Brush your teeth before bed 🪥"
+              status: completed
+            target:
+              entity_id: todo.habitica_dailies
+```
+
+{% enddetails %}
 
 ## API Service
 

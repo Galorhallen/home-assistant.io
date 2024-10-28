@@ -69,7 +69,7 @@ This {% term integration %} currently supports the following device types within
 - [Switch](/integrations/switch/)
 - [Update](/integrations/update/)
 
-In addition, it has support for "Zigbee groups" that enable native on-device grouping of multiple Zigbee lights, switches, and fans that enable controlling all entities for those devices in those groups with one command. At least two entities must be added to a Zigbee group inside the ZHA {% term integration %} before a group entity is created. There is also support for native on-device Zigbee [binding and unbinding (i.e. bind a remote to a lightbulb or group)](#binding-and-unbinding).
+In addition, it has support for "Zigbee groups" that enable native on-device grouping of multiple Zigbee lights, switches, and fans that enable controlling all entities for those devices in those groups with one command. At least two entities must be added to a Zigbee group inside the ZHA {% term integration %} before a group entity is created. There is also support for native on-device Zigbee [binding and unbinding (i.e. bind a remote to a lightbulb or group)](#zigbee-binding-and-unbinding).
 
 ## Introduction
 
@@ -97,21 +97,18 @@ Some other Zigbee coordinator hardware may not support a firmware that is capabl
   - [Home Assistant Connect ZBT-1](/connectzbt1/) (EFR32MG21-based USB dongle)
   - [Home Assistant Yellow](/yellow/) with integrated EFR32MG21 radio
   - [ITead SONOFF Zigbee 3.0 USB Dongle Plus Model "ZBDongle-E" (EFR32MG21 variant)](https://itead.cc/product/zigbee-3-0-usb-dongle/)
-  - [Elelabs Zigbee USB Adapter](https://elelabs.com/products/elelabs-usb-adapter.html)/POPP ZB-Stick (Note! Not a must but recommend [upgrade the EmberZNet NCP application firmware](https://github.com/Elelabs/elelabs-zigbee-ezsp-utility))
-  - [Elelabs Zigbee Raspberry Pi Shield](https://elelabs.com/products/elelabs-zigbee-shield.html) (Note! Not a must but recommend [upgrade the EmberZNet NCP application firmware](https://github.com/Elelabs/elelabs-zigbee-ezsp-utility))
   - [SMLIGHT SLZB-07](https://smlight.tech/product/slzb-07/) (EFR32MG21-based USB dongle)
 - Texas Instruments based radios (via the [zigpy-znp](https://github.com/zigpy/zigpy-znp) library for zigpy)
   - [CC2652P/CC2652R/CC2652RB USB stick, module, or dev board hardware flashed with Z-Stack coordinator firmware](https://www.zigbee2mqtt.io/guide/adapters/)
   - [CC1352P/CC1352R USB stick, module, or dev board hardware flashed with Z-Stack coordinator firmware](https://www.zigbee2mqtt.io/guide/adapters/)
-  - [XZG - Universal Firmware for Zigbee Gateway](https://xzg.xyzroe.cc/)
 - dresden elektronik deCONZ based Zigbee radios (via the [zigpy-deconz](https://github.com/zigpy/zigpy-deconz) library for zigpy)
   - [ConBee III (a.k.a. ConBee 3) USB adapter from dresden elektronik](https://phoscon.de/conbee3)
-  - [ConBee II (a.k.a. ConBee 2) USB adapter from dresden elektronik](https://phoscon.de/conbee2)
-  - [RaspBee II (a.k.a. RaspBee 2) Raspberry Pi Shield from dresden elektronik](https://phoscon.de/raspbee2)
 
 ### Other supported but not recommended Zigbee radio adapters or modules
 
 - Silicon Labs EmberZNet based radios using legacy hardware using the EZSP protocol (via the [bellows](https://github.com/zigpy/bellows) library for zigpy)
+  - [Elelabs Zigbee USB Adapter](https://elelabs.com/products/elelabs-usb-adapter.html)/POPP ZB-Stick (Note! Not a must but recommend [upgrade the EmberZNet NCP application firmware](https://github.com/Elelabs/elelabs-zigbee-ezsp-utility))
+  - [Elelabs Zigbee Raspberry Pi Shield](https://elelabs.com/products/elelabs-zigbee-shield.html) (Note! Not a must but recommend [upgrade the EmberZNet NCP application firmware](https://github.com/Elelabs/elelabs-zigbee-ezsp-utility))
   - [ITead Sonoff ZBBridge](https://itead.cc/product/sonoff-zbbridge/) (Note! [WiFi-based bridges are not recommended for ZHA with EZSP radios](https://github.com/home-assistant/home-assistant.io/issues/17170). Also, this first has to be flashed with [Tasmota firmware and Silabs EmberZNet NCP EZSP UART Host firmware to use as Serial-to-IP adapter](https://www.digiblur.com/2020/07/how-to-use-sonoff-zigbee-bridge-with.html))
   - [Nortek GoControl QuickStick Combo Model HUSBZB-1 (Z-Wave & Zigbee Ember 3581 USB Adapter)](https://www.nortekcontrol.com/products/2gig/husbzb-1-gocontrol-quickstick-combo/) (Note! Not a must but recommend [upgrade the EmberZNet NCP application firmware](https://github.com/walthowd/husbzb-firmware))
   - [Bitron Video/Smabit BV AV2010/10 USB-Stick](https://manuals.smabit.eu/len/av2010_10.html) with Silicon Labs Ember 3587
@@ -120,6 +117,8 @@ Some other Zigbee coordinator hardware may not support a firmware that is capabl
   - [CC2538 USB stick, module, or dev board hardware flashed with Z-Stack coordinator firmware](https://www.zigbee2mqtt.io/information/supported_adapters) (no longer recommended as only got deprecated old end-of-life firmware)
   - [CC2530/CC2531 USB stick, module, or dev board hardware flashed with Z-Stack coordinator firmware](https://www.zigbee2mqtt.io/information/supported_adapters) (no longer recommended as uses deprecated hardware and very old end-of-life firmware, plus will not work properly at all if the whole Zigbee network has more than 15-20 devices)
 - dresden elektronik deCONZ based Zigbee radios using legacy hardware (via the [zigpy-deconz](https://github.com/zigpy/zigpy-deconz) library for zigpy)
+  - [ConBee II (a.k.a. ConBee 2) USB adapter from dresden elektronik](https://phoscon.de/conbee2)
+  - [RaspBee II (a.k.a. RaspBee 2) Raspberry Pi Shield from dresden elektronik](https://phoscon.de/raspbee2)
   - [ConBee USB adapter from dresden elektronik](https://phoscon.de/conbee)
   - [RaspBee Raspberry Pi Shield from dresden elektronik](https://phoscon.de/raspbee)
 - Digi XBee Zigbee based radios (via the [zigpy-xbee](https://github.com/zigpy/zigpy-xbee) library for zigpy)
@@ -255,23 +254,9 @@ custom_quirks_path:
 
 ### Advanced OTA configuration
 
-The default configuration for OTA firmware updates is chosen by ZHA developers, so normal users should not need to change any configuration. Most of the config options listed in the zigpy section are just meant for development or advanced users.
+OTA for a few manufacturers is enabled by default, currently Ledvance, Sonoff, Inovelli, and ThirdReality. Other manufacturers are supported but disabled by default because their updates may change or remove device functionality, may require you to reconfigure devices, or are contributed by the community and may be minimally tested.
 
-Further advanced configuration options are only provided in the [zigpy project's developers documentation](https://github.com/zigpy/zigpy).
-
-However, if you want to disable OTA updates for a specific manufacturer, you can add the following lines to your `configuration.yaml` and restart Home Assistant.
-
-```yaml
-zha:
-  zigpy_config:
-    ota:
-      ikea_provider: false                       # Disable OTA update downloads for Trådfri devices
-      inovelli_provider: false                   # Disable OTA update downloads for INOVELLI devices
-      ledvance_provider: false                   # Disable OTA update downloads for LEDVANCE/OSRAM devices
-      salus_provider: false                      # Disable OTA update downloads for SALUS/Computime devices
-      sonoff_provider: false                     # Disable OTA update downloads for Sonoff (ITead) devices
-      thirdreality_provider: false               # Disable OTA update downloads for 3REALITY devices
-```
+Refer to the [zigpy documentation for OTA configuration](https://github.com/zigpy/zigpy/wiki/OTA-Configuration) for more information on additional OTA providers.
 
 ### Defining Zigbee channel to use
 

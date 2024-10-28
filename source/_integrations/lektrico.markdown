@@ -3,7 +3,7 @@ title: Lektrico Charging Station
 description: Instructions on how to integrate a Lektrico Chargering Station with Home Assistant.
 ha_category:
   - Sensor
-ha_release: "2024.10"
+ha_release: '2024.10'
 ha_iot_class: Local Polling
 ha_config_flow: true
 ha_codeowners:
@@ -11,7 +11,11 @@ ha_codeowners:
 ha_domain: lektrico
 ha_zeroconf: true
 ha_platforms:
+  - button
+  - number
+  - select
   - sensor
+ha_integration_type: device
 ---
 
 The **Lektrico Charging Station** integration integrates your [Lektrico Charging Station](https://lektri.co) into your Home Assistant and allows you to monitor it.
@@ -77,3 +81,61 @@ Sensors available in the library:
 | pf_l1               |      | Power factor on L1.                                       |
 | pf_l2               |      | Power factor on L2.                                       |
 | pf_l3               |      | Power factor on L3.                                       |
+
+## Buttons
+
+Buttons available in the library:
+
+### Chargers
+
+| Button              | Description                        |
+| :------------------ | :--------------------------------- |
+| charge_start        | Command charger to start charging. |
+| charge_stop         | Command charger to stop charging.  |
+| reboot              | Reboot charger.                    |
+
+### Energy meters
+
+| Button              | Description                        |
+| :------------------ | :--------------------------------- |
+| reboot              | Reboot energy meter.               |
+
+## Numbers
+
+Numbers available in the library:
+
+### Chargers
+
+| Number             | Unit | Range   | Description                               |
+| :----------------- | :--- | :------ | :---------------------------------------- |
+| led_max_brightness | %    | 0 - 100 | Set the LED brightness of the charger.    |
+| dynamic_limit      | A    | 0 - 32  | Set the maximum allowed charging current. |
+
+## Selects
+
+Selects available in the library:
+
+### Energy meters
+
+| Select              | Description                             |
+| :------------------ | :-------------------------------------- |
+| lb_mode             | Select the load balancing mode of the energy meter. The options are **Disabled**, **Power**, **Hybrid**, and **Green**. |
+
+## Switches
+
+Switches available in the library:
+
+### Single-phase charger
+
+| Switch              | Description                             |
+| :------------------ | :-------------------------------------- |
+| authentication      | Allows to select if the charger will automatically start to charge or if it needs authentication. |
+| lock                | Allows to select if the charger is locked or not. When the charger is locked, no charging is possible.|
+
+### Three-phase charger
+
+| Switch              | Description                             |
+| :------------------ | :-------------------------------------- |
+| authentication      | Allows to select if the charger will automatically start to charge or if it needs authentication. |
+| lock                | Allows to select if the charger is locked or not. When the charger is locked, no charging is possible.|
+| force_single_phase  | Allows to put the three-phase charger in single-phase mode or three-phase mode. |
