@@ -22,7 +22,6 @@ To enable local control on your Govee device, refer to the instructions availabl
 
 ## Supported devices
 
-H600D,
 H6022,
 H6039,
 H6042,
